@@ -1,0 +1,49 @@
+\section{Setup}
+\label{sec:setup}
+
+\paragraph{The model.} \bgpt{}-v4 is a 12.5B-parameter sequence model trained on 150B e-commerce actions \cite{unbox2026docs}. Its API takes a user history (search, view, add-to-cart and order events) and, optionally, a query. It returns raw similarity scores for catalog items, not probabilities. A filter by item id scores any chosen set of items. We uploaded a private catalog of 74{,}347 products containing every item shown to or chosen by any human or agent in our data. In preliminary checks the API was deterministic, the history changed the ranking, and the model ignored timing below the hour. Because the API terms let the vendor train on uploaded content, we used only public data.
+
+\paragraph{Scoring a choice in context.} For a choice $c$ made from a shown list $L$ (with $|L|=n$) after history $h$ and query $q$, one API call with the id filter set to $L$ gives scores $s_i(h,q)$ for all $i\in L$. We use:
+\begin{itemize}
+  \item the \textbf{within-list percentile} of $s_c$ in $L$ (1 means the model's top pick);
+  \item the \textbf{conditional logit} $s_c/\tau-\log\sum_{i\in L}e^{s_i/\tau}+\log n$, with $\tau$ fit by maximum likelihood on human choices from the other half of the users (2-fold by user);
+  \item the \textbf{history gain}: the percentile with $h$ minus the percentile with an empty history.
+\end{itemize}
+All three compare the choice only with what the chooser actually saw, so they are invariant to the engine that produced $L$. The vendor's original statistic instead compares $c$ against the whole catalog.
+
+\paragraph{Baselines.} Five features of the chosen item within $L$, computed without \bgpt{}: log list position, sponsored flag, price percentile, star rating, and query--title word-overlap percentile. Detectors are logistic regressions on baselines, on \bgpt{} features, or on both, evaluated with 5-fold cross-validation grouped by user. We report AUROC with the agent as the positive class, with 95\% intervals from a bootstrap over users.
+
+\section{Pilot: an engine confound}
+\label{sec:pilot}
+WebShop \cite{yao2022webshop} provides 1{,}643 human sessions on a 1.18M-product store. We took 150 test humans, plus 300 others to calibrate the vendor's statistic. We ran Claude Haiku 5.5 and DeepSeek V4 Flash on the same 150 instructions in a re-implementation of the store with BM25 search. With the vendor's method \cite{unbox2026anomaly}, agents look \emph{less} surprising (AUROC 0.57 for predictability, paired by instruction $p\approx0.001$, same sign for both models).
+
+The effect is not behavioral. Our engine's lists were themselves more aligned with \bgpt{}: 63\% of their top-10 items fall in the model's top 100, against 56\% for the original engine. Scored within the list each chooser actually saw, the gap vanishes (AUROC 0.50 [0.44, 0.55], paired $p=0.59$; Fig.~\ref{fig:auroc}a). WebShop has two further problems: a median of one scored step per session, and instructed crowd workers who behave like agents by design. It is the wrong testbed.
+
+\section{Counterfactual replay}
+\label{sec:replay}
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[font=\footnotesize,
+  box/.style={draw=ink!60, rounded corners=2pt, align=center, inner sep=4pt, fill=white, text width=#1},
+  arr/.style={-{Stealth[length=1.8mm]}, ink, line width=0.6pt}]
+\node[box=2.7cm] (ctx) at (0,0) {\textbf{Shared context}\\[2pt] real user history $h$\\ query $q$\\ shown list $L$ (median 55)\\[1pt]\scriptsize OPeRA, live amazon.com};
+\node[box=2.4cm, draw=ink, line width=0.8pt] (hum) at (3.75,0.85) {\textbf{Human} clicks $c_H$\\[1pt]\scriptsize logged choice};
+\node[box=2.4cm, draw=cblue, line width=0.8pt] (ag) at (3.75,-0.85) {\textbf{LLM agent} picks $c_A$\\[1pt]\scriptsize user persona + last 12 events};
+\node[box=2.4cm] (bg) at (7.1,0) {\textbf{\bgpt{}}\\ scores every item in $L$ given $(h,q)$\\[1pt]\scriptsize one API call per step};
+\node[box=2.2cm] (out) at (10.15,0) {\textbf{Compare} $c_H$ vs.\ $c_A$\\[1pt]\scriptsize percentile, logit, history gain};
+\draw[arr] (ctx.east) -- ++(0.3,0) |- (hum.west);
+\draw[arr] (ctx.east) -- ++(0.3,0) |- (ag.west);
+\draw[arr] (hum.east) -- ++(0.3,0) |- (bg.west);
+\draw[arr] (ag.east) -- ++(0.3,0) |- (bg.west);
+\draw[arr] (bg.east) -- (out.west);
+\end{tikzpicture}
+\caption{\textbf{Counterfactual replay.} At each human click, an agent acting for the same user chooses from the identical list with the identical history. Engine, query and context are held fixed, so any difference between the two choices comes from the chooser.}
+\label{fig:design}
+\end{figure}
+
+\paragraph{Human data.} OPeRA \cite{wang2025opera} logs real users shopping on Amazon with a browser plug-in, along with their self-reported personas. From the full release (54 users, 692 sessions) we build one time-ordered event stream per user across all of that user's sessions. We extract every click on a product in a search-result list where the logged page contains the full list. This gives 384 steps from 45 users, with a median list size of 55 and a median of 13 history events per API call.
+
+\paragraph{Agents.} At each step, an LLM receives the user's survey persona, their last 12 events, the query and the full list in page order (title, price, rating, sponsored flag), and returns the item it would open (Fig.~\ref{fig:design}). There are three conditions: Claude Haiku 5.5 with persona, the same without persona, and DeepSeek V4 Flash with persona (temperature 0.7). Haiku answered every step. DeepSeek answered 247 of 384 validly; the remaining responses were empty or malformed. Agents chose the same item as the human in 10\%, 14\% and 19\% of steps, respectively.
+
+\paragraph{Why this design.} It removes the two confounds that undermine naive comparisons: the engine (both choices come from one list) and the intent (both act on the same query and history). It also matches the threat model of a delegated agent operating within a legitimate account. The cost is that each decision is judged in isolation; we return to this in \S\ref{sec:discussion}.

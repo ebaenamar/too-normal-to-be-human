@@ -1,0 +1,13 @@
+\section{Discussion}
+\label{sec:discussion}
+
+\paragraph{Implications for detection.} The vendor's anomaly pipeline flags behavior the model finds surprising. Against LLM agents this points the wrong way: at the level of single choices, agents are slightly \emph{more} typical than the humans they act for. A detector built on a behavioral foundation model would need a two-sided or ``too-typical'' test. Even then it would add nothing over a handful of list features that any platform already logs. Advertising engagement in particular is a strong, cheap and so far overlooked signal of a human chooser.
+
+\paragraph{Implications for evaluation.} Our pilot shows how easily a spurious effect appears: a different search engine alone produced a significant, model-consistent difference between humans and agents. Any comparison of humans and agents across environments, including agent benchmarks that reuse human demonstrations \cite{yao2022webshop,zeng2023agenttuning}, should score choices relative to what each chooser was shown. Counterfactual replay on logged human sessions does this by construction and is cheap: about 1{,}000 LLM calls and 768 API calls here.
+
+\paragraph{Limitations.} We judge single decisions, not whole agent sessions, so query formulation, navigation, timing and dwell, plausibly the strongest agent tells, are out of scope. \bgpt{} cannot read them anyway, since it ignores time below the hour. OPeRA products enter the catalog with title and price only, which may weaken the model's item representations. DeepSeek's 36\% invalid responses may select easier steps. Our sample of 45 users is small for user-level claims. We test one behavioral foundation model through its public interface, without access to its weights.
+
+\paragraph{Broader impact.} Detection of delegated agents can protect users and platforms. It can also be used to block legitimate assistive agents, and our findings suggest that crude heuristics (ad avoidance) would do so with many false positives. For sensitive deployments such as defense or government networks, current hosted behavioral models are unsuitable regardless of accuracy, because their terms allow training on uploaded data. We used only public datasets.
+
+\section{Conclusion}
+A behavioral foundation model can tell LLM agents from the humans they act for, but only weakly, in the opposite direction to the one anomaly detection assumes, and not beyond what five cheap features already provide. Engine-controlled, context-matched evaluation, here through counterfactual replay, is necessary to see this; without it, a search-engine confound produces a convincing but spurious effect.

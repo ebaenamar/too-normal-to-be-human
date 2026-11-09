@@ -1,0 +1,28 @@
+# secrets
+.env
+.env.*
+
+# environments
+.venv/
+__pycache__/
+
+# data (public datasets are re-downloaded; derived files are rebuilt by src/)
+data/
+*.sqlite
+*.parquet
+
+# third-party code, cloned at the pinned commit in vendor/ANOMALY_COMMIT
+vendor/behaviorgpt-anomaly/
+
+# run logs and LaTeX build artifacts
+logs_*.txt
+paper/*.aux
+paper/*.log
+paper/*.out
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.bbl
+paper/*.blg
+paper/*.synctex.gz
+paper/build.log
+.DS_Store

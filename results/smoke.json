@@ -1,0 +1,50 @@
+{
+  "catalog": "retail_catalog_500k",
+  "when": "2026-11-08T17:32:30.191730+00:00",
+  "seed_null_scores": 0,
+  "1_determinism": {
+    "pass": true,
+    "same_ids": true,
+    "max_score_diff": 0.0
+  },
+  "2_id_filter": {
+    "pass": true,
+    "returned": 4,
+    "asked": 4,
+    "consistent_with_head": true,
+    "outside_item_score": 1.3033509,
+    "head_top_score": 1.490199,
+    "head_100th_score": 1.3597071
+  },
+  "3_history": {
+    "pass": true,
+    "top20_overlap_vs_empty": 0,
+    "top20_overlap_vs_personalized_false": 0
+  },
+  "4_timing_free": {
+    "pass": true,
+    "max_score_diff": 0.0
+  },
+  "5_throughput": {
+    "1": {
+      "calls_per_min": 348.4,
+      "sec_per_call": 0.172,
+      "new_429": 0
+    },
+    "4": {
+      "calls_per_min": 817.4,
+      "sec_per_call": 0.073,
+      "new_429": 0
+    },
+    "8": {
+      "calls_per_min": 1302.4,
+      "sec_per_call": 0.046,
+      "new_429": 0
+    }
+  },
+  "stats": {
+    "calls": 82,
+    "429": 0,
+    "errors": 0
+  }
+}

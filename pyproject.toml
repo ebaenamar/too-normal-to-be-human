@@ -1,0 +1,17 @@
+[project]
+name = "bgpt-agent-detect"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.12"
+dependencies = [
+    "behaviorgpt>=0.8",
+    "gdown>=6.5.1",
+    "huggingface-hub>=2.4.0",
+    "ijson>=3.6.0",
+    "matplotlib>=3.11.2",
+    "numpy>=2.5.4",
+    "pandas>=3.1.1",
+    "pyarrow>=26.0.1",
+    "python-dotenv>=1.2.4",
+    "scikit-learn>=1.9.1",
+]

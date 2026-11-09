@@ -1,0 +1,24 @@
+\begin{abstract}
+LLM agents now browse and buy on behalf of people. Whether a platform can tell them from their owners matters for fraud, account takeover, and in sensitive settings for insider-risk monitoring. A natural candidate is a \emph{behavioral foundation model}: a sequence model pretrained on billions of user actions whose next-action likelihood should flag anything that is not human.
+We test this with \bgpt{} (12.5B parameters, 150B e-commerce actions), using its public API and its vendor's own anomaly-scoring method.
+In a WebShop pilot, agents look \emph{less} surprising than humans, but we show that this is entirely a search-engine confound. Once the shown list is controlled, AUROC falls from 0.57 to 0.50.
+We then introduce \emph{counterfactual replay} on OPeRA, a dataset of real Amazon sessions from 45 users. At each human click, an LLM agent acting for that user chooses from the identical result list with the identical history, so engine, query and context are fixed by construction.
+Agents from two model families, with and without the user's persona, consistently choose items that \bgpt{} ranks \emph{higher} than the human's choice (paired $p\le 0.014$ in all three conditions): they are \emph{too normal}, not anomalous.
+The signal is weak, however (step AUROC 0.54--0.58), and adds nothing to a five-feature logistic regression over the shown list (sponsored, position, rating, price, query overlap), which reaches 0.62--0.80.
+Behavioral foundation models therefore need to be evaluated against cheap, context-matched baselines and under controlled engines, and anomaly-style detectors aimed at agents are pointed in the wrong direction.
+\end{abstract}
+
+\section{Introduction}
+Web agents built on large language models (LLMs) can now search, compare and purchase on real sites \cite{yao2022webshop,deng2023mind2web,zhou2023webarena}. Increasingly they do so \emph{inside a human's account}, with the human's history, preferences and payment methods. For a platform, this raises a question that classic bot detection was not built for: given a real user's session, did the user or an agent acting for them make this choice? The same question arises wherever delegated agents operate on accounts that carry trust, from fraud and account takeover in commerce to insider-risk monitoring on government and defense networks.
+
+Behavioral foundation models offer an attractive answer. Pretrained on very large logs of user actions, they assign a likelihood to every next action given a user's history, much as sequential recommenders do \cite{kang2018sasrec}. The vendor-recommended way to turn such a model into a detector is anomaly scoring: convert next-action scores into probabilities, compute excess surprisal, and accumulate it with a CUSUM statistic \cite{page1954cusum,unbox2026anomaly}. This assumes that non-human behavior is \emph{surprising}. LLM agents, however, are trained on human text and pick sensible, popular options. They may instead be \emph{too predictable}.
+
+We test this assumption on \bgpt{} \cite{unbox2026docs} through its public API, at a total compute cost below US\$10. Our contributions are:
+\begin{enumerate}
+  \item \textbf{A confound.} In a WebShop pilot \cite{yao2022webshop}, agents appear less surprising than humans (AUROC 0.57), but the effect comes entirely from the search engine that produced each class's result lists. Measured within the shown list, it disappears (0.50; \S\ref{sec:pilot}).
+  \item \textbf{A protocol.} \emph{Counterfactual replay} on real human sessions (OPeRA \cite{wang2025opera}): at every human click an agent chooses from the identical list with the identical history. Engine, query and context are held fixed by construction, and the setting matches delegated agents acting inside an account (\S\ref{sec:replay}).
+  \item \textbf{A finding.} Across two model families and with or without the user's persona, agents are \emph{too normal}: \bgpt{} ranks their choices higher than the human's ($p\le0.014$). The signal is weak (AUROC 0.54--0.58) and redundant with five cheap list features, which reach 0.62--0.80 on their own (\S\ref{sec:results}).
+\end{enumerate}
+All code, prompts and cached API responses are released.
+
+\paragraph{Related work.} LLM agents for web shopping are usually evaluated for task success \cite{yao2022webshop,deng2023mind2web,zhou2023webarena,zeng2023agenttuning}. A parallel line uses LLMs to \emph{simulate} human behavior \cite{park2023generative}, and OPeRA \cite{wang2025opera} was built to measure how well they imitate individual shoppers. We ask the converse, security-oriented question: can a model of human behavior tell them apart? The vendor's anomaly toolkit \cite{unbox2026anomaly} evaluates detection only on simulated perturbations. To our knowledge, this is the first evaluation of a behavioral foundation model against real LLM agents under a controlled engine.
