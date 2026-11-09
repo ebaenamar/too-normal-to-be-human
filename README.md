@@ -58,6 +58,28 @@ The five list features are list position, sponsored flag, price percentile, star
 
 ![Cheap tells](paper/figures/fig_tells.png)
 
+### 3. Whole trajectories under the original engine
+
+Single decisions only tell part of the story, so we also compared complete shopping sessions.
+
+- **Engine.** We rebuilt WebShop's original search engine over all 1.18M products. It reproduces the humans' first results page exactly for **99.6%** of 2,364 searches.
+- **Agents.** Claude Haiku 5.5 and DeepSeek V4 Flash shopped in the official WebShop environment, with the same actions and the same 150 goals as the humans. That gives 300 complete sessions, each paired with a human session.
+
+| Detector (session-level AUROC) | Haiku 5.5 | DeepSeek V4 Flash |
+|---|---|---|
+| Trajectory features | **0.76** | **0.85** |
+| Same, without purchase features | 0.70 | 0.84 |
+| BehaviorGPT only | 0.58 | 0.58 |
+| Trajectory + BehaviorGPT | 0.75 | 0.85 |
+
+Every human demo ends in a purchase, so we checked the result with the purchase features removed.
+
+- **Haiku barely compares:** it views 1.2 items per session vs 2.0 for humans, and returns to the results list 0.35 times vs 1.2.
+- **DeepSeek over-searches:** 3.9 queries per session vs 1.4.
+- **BehaviorGPT adds nothing:** it scores which product is chosen, and what separates the classes is how people navigate. A session also yields a median of only one step it can score.
+
+![Whole trajectories](paper/figures/fig_traj.png)
+
 ## Paper
 
 NeurIPS-format draft: [`paper/main.pdf`](paper/main.pdf), with LaTeX sources in `paper/`. Every number in the text is regenerated into `paper/numbers.json` by `src/figures.py`.
@@ -80,6 +102,12 @@ src/
   opera_score.py     one BehaviorGPT call per step, with and without history
   opera_analyze.py   paired tests, AUROCs, grouped-CV detectors
   figures.py         publication figures + paper/numbers.json
+  ws_build_docs.py   rebuild WebShop's original search documents (full catalog)
+  ws_verify.py       check the rebuilt engine against the humans' result pages
+  ws_agent.py        full-trajectory agents in the official WebShop text environment
+  ws_convert.py      human and agent trajectories -> one format + trajectory features
+  ws_score.py        BehaviorGPT session scoring (vendor method)
+  ws_analyze.py      session-level detectors; figures_traj.py makes fig_traj
 results/             PILOT.md, OPERA_REPLAY.md and JSON outputs
 paper/               LaTeX sources, figures (PDF + PNG), compiled PDF
 ```
@@ -116,11 +144,18 @@ Requirements: [uv](https://docs.astral.sh/uv/), a BehaviorGPT API key and an Ope
    uv run python src/figures.py
    ```
 
+For the trajectory experiment, clone https://github.com/princeton-nlp/WebShop into `vendor/WebShop`. Then:
+
+- Create a Python 3.10 venv at `vendor/ws-venv` with `pyserini==0.17.0` and the WebShop text-environment dependencies; it needs Java 11.
+- Run `src/ws_build_docs.py`.
+- Index with `pyserini.index.lucene` using the repo's `run_indexing.sh` settings.
+- Run `src/ws_verify.py`, then `src/ws_agent.py` and `src/ws_convert.py`, `ws_score.py`, `ws_analyze.py`.
+
 Cost: under US$10 in LLM calls; the BehaviorGPT API was free during early access.
 
 ## Limitations
 
-- We judge single decisions, not full agent sessions. Query writing, navigation and timing are out of scope, and BehaviorGPT ignores time below the hour anyway.
+- Full sessions are tested only on WebShop, where humans follow instructions. Timing is not modelled, and BehaviorGPT ignores time below the hour anyway.
 - OPeRA products enter the catalog with title and price only.
 - 36% of DeepSeek's answers were invalid.
 - 45 users is a small sample for user-level claims.

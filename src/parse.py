@@ -36,6 +36,14 @@ def norm_instr(s: str) -> str:
 # ---------------------------------------------------------------- humans
 def parse_human(path: str) -> dict | None:
     rows = [json.loads(l) for l in open(path)]
+    out = parse_rows(rows)
+    if out:
+        out["sid"] = "h_" + Path(path).stem
+    return out
+
+
+def parse_rows(rows: list[dict]) -> dict | None:
+    """WebShop page-visit log (human demo format: page, url, content) -> unified session."""
     if not rows:
         return None
     goal = rows[0].get("goal") or {}
@@ -73,7 +81,7 @@ def parse_human(path: str) -> dict | None:
             if a:
                 events.append({"type": "order", "item": a})
     return {
-        "sid": "h_" + Path(path).stem,
+        "sid": None,
         "source": "human",
         "instruction": norm_instr(goal.get("instruction_text", "")),
         "goal_asin": goal.get("asin"),

@@ -1,0 +1,74 @@
+{
+ "claude-haiku-5-5|all sessions|traj (no purchase feats)": [
+  0.7034,
+  0.6494350000000001,
+  0.7548266666666666,
+  150
+ ],
+ "claude-haiku-5-5|all sessions|BGPT only": [
+  0.5795333333333333,
+  0.52971,
+  0.6282283333333334,
+  150
+ ],
+ "claude-haiku-5-5|all sessions|traj+BGPT": [
+  0.6904444444444444,
+  0.6330399999999999,
+  0.7419772222222223,
+  150
+ ],
+ "claude-haiku-5-5|agent bought only|traj (no purchase feats)": [
+  0.6592603550295858,
+  0.5952196745562129,
+  0.7193528106508876,
+  130
+ ],
+ "claude-haiku-5-5|agent bought only|BGPT only": [
+  0.5766568047337279,
+  0.5233676035502959,
+  0.6312758875739645,
+  130
+ ],
+ "claude-haiku-5-5|agent bought only|traj+BGPT": [
+  0.6348520710059172,
+  0.5707329881656804,
+  0.6915754437869822,
+  130
+ ],
+ "deepseek-v4-flash|all sessions|traj (no purchase feats)": [
+  0.8418666666666667,
+  0.8006727777777778,
+  0.8808777777777778,
+  150
+ ],
+ "deepseek-v4-flash|all sessions|BGPT only": [
+  0.5819777777777777,
+  0.53115,
+  0.6313616666666666,
+  150
+ ],
+ "deepseek-v4-flash|all sessions|traj+BGPT": [
+  0.8402444444444443,
+  0.8005138888888889,
+  0.8797577777777779,
+  150
+ ],
+ "deepseek-v4-flash|agent bought only|traj (no purchase feats)": [
+  0.8070956621660442,
+  0.7595859666762425,
+  0.8527371804079288,
+  118
+ ],
+ "deepseek-v4-flash|agent bought only|BGPT only": [
+  0.5584243033611032,
+  0.5011122881355932,
+  0.6150657138753232,
+  118
+ ],
+ "deepseek-v4-flash|agent bought only|traj+BGPT": [
+  0.7965742602700373,
+  0.7471703533467395,
+  0.8444197069807526,
+  118
+ ]
+}

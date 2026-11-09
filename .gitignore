@@ -26,3 +26,7 @@ paper/*.blg
 paper/*.synctex.gz
 paper/build.log
 .DS_Store
+
+# WebShop official environment (cloned) and its Python 3.10 venv
+vendor/WebShop/
+vendor/ws-venv/
