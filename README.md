@@ -80,6 +80,13 @@ Every human demo ends in a purchase, so we checked the result with the purchase 
 
 ![Whole trajectories](paper/figures/fig_traj.png)
 
+## BehaviorGPT resources
+
+- **Overview:** https://unboxai.com/behaviorgpt/overview
+- **Platform and API keys:** https://portal.unboxai.com/ (API docs at https://portal.unboxai.com/docs/)
+- **Python client** (`behaviorgpt`, MIT; used here to upload the catalog): https://github.com/Unbox-AI/behaviorgpt
+- **Anomaly-scoring toolkit** (MIT; the vendor method we evaluate): https://github.com/Unbox-AI/behaviorgpt-anomaly
+
 ## Paper
 
 NeurIPS-format draft: [`paper/main.pdf`](paper/main.pdf), with LaTeX sources in `paper/`. Every number in the text is regenerated into `paper/numbers.json` by `src/figures.py`.
